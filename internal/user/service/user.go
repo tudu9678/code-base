@@ -3,14 +3,16 @@ package service
 
 import (
 	"context"
-	"strings"
+	"time"
 
 	_ "myapp/config"
 
 	"go.uber.org/zap"
 	"golang.org/x/crypto/bcrypt"
 
+	cCm "myapp/core/common"
 	in "myapp/core/initialize"
+	"myapp/core/initialize/auth"
 	"myapp/internal/user/dto"
 	"myapp/internal/user/model"
 	"myapp/internal/user/repository"
@@ -18,8 +20,9 @@ import (
 
 type user struct {
 	//conf   config.Config       `inject:"configs"`
-	repo   repository.UserRepo `inject:"user-repo"`
-	logger in.Logging          `inject:"logging"`
+	repo    repository.UserRepo `inject:"user-repo"`
+	logger  in.Logging          `inject:"logging"`
+	jwtAuth *auth.JWTAuth       `inject:"jwt-auth"`
 	//jwtAuth *auth.JWTAuth
 	//zapLog  *zap.Logger
 }
@@ -29,11 +32,6 @@ func NewUserService() User {
 }
 
 func (u *user) Register(ctx context.Context, req *dto.CreateUserReq) (*dto.RegisterRes, error) {
-	pCode := req.PhoneCode
-	pNum := req.PhoneNumber
-	// if err := u.validateCreateUser(req); err != nil {
-	// 	return nil, err
-	// }
 
 	password, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
 	if err != nil {
@@ -42,47 +40,51 @@ func (u *user) Register(ctx context.Context, req *dto.CreateUserReq) (*dto.Regis
 		return nil, err
 	}
 
-	userModel := &model.User{
-		Email:       strings.ToLower(req.Email),
-		PhoneCode:   pCode,
-		PhoneNumber: pNum,
-		Password:    string(password),
-		//Status:      model.UserStatusActive,
+	dob, err := time.Parse(cCm.DateFm, req.Dob)
+	if err != nil {
+		u.logger.Error(ctx, "[Register] Dob time.Parse err: %v", err)
+		return nil, err
 	}
-	userModel.CreatedBy = strings.ToLower(req.Email)
-	userModel.UpdatedBy = strings.ToLower(req.Email)
+
+	userModel := &model.User{
+		FullName:    req.FullName,
+		PhoneNumber: req.PhoneNumber,
+		Email:       req.Email,
+		UserName:    req.UserName,
+		Password:    string(password),
+		Dob:         &dob,
+		LatestLogin: &time.Time{},
+		CreatedAt:   time.Time{},
+		UpdatedAt:   time.Time{},
+	}
 
 	if err := u.repo.CreateUser(userModel); err != nil {
 		return nil, err
 	}
 
-	//go u.SendPhoneOtp(context.Background(), userModel.ID, pCode, pNum, model.OtpActionRegister)
-	//go u.SendEmailOtp(context.Background(), userModel.ID, userModel.Email, model.MailTypeRegister)
-
-	//tokenExpire := "3600"
-
-	// if err != nil {
-	// 	u.logger.Error("[Register] get Env %s err: %v", zap.Any("constants.TOKEN_TTL", constants.TOKEN_TTL), zap.Error(err))
-	// }
-
-	// auth, err := u.jwtAuth.CreateToken(userModel, tokenExpire)
-	// if err != nil {
-	// 	u.logger.Info("[Login] username %v - CreateToken err %v", zap.Any("userModel.Email", userModel.Email), zap.Error(err))
-	// 	return nil, ce.New(ce.ErrorSomethingWentWrong, "something went wrong", nil)
-	// }
+	tokenExpire := "3600"
+	auth, err := u.jwtAuth.CreateToken(&auth.User{
+		ID:       userModel.ID.String(),
+		UserName: userModel.UserName,
+		FullName: userModel.FullName,
+	}, tokenExpire)
+	if err != nil {
+		u.logger.Info(ctx, "[Login] username %v - CreateToken err %v", req.UserName, err)
+		return nil, err
+	}
 
 	return &dto.RegisterRes{
 		UserInfo: &dto.UserRes{
 			ID:          userModel.ID.String(),
 			Email:       userModel.Email,
-			PhoneCode:   userModel.PhoneCode,
 			PhoneNumber: userModel.PhoneNumber,
+			FullName:    userModel.FullName,
 		},
 		Auth: &dto.AuthRes{
-			UserID: userModel.ID.String(),
-			// AccessToken:  auth.AccessToken,
-			// RefreshToken: auth.RefreshToken,
-			// ExpiresIn:    uint64(auth.AccessTokenDuration),
+			UserID:       userModel.ID.String(),
+			AccessToken:  auth.AccessToken,
+			RefreshToken: auth.RefreshToken,
+			ExpiresIn:    uint64(auth.AccessTokenDuration),
 		},
 	}, nil
 }

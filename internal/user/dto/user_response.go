@@ -13,18 +13,13 @@ type AuthRes struct {
 }
 
 type UserRes struct {
-	ID             string `json:"id"`
-	Email          string `json:"email"`
-	PhoneCode      string `json:"phoneCode"`
-	PhoneNumber    string `json:"phoneNumber"`
-	FirstName      string `json:"firstName"`
-	LastName       string `json:"lastName"`
-	NameAndSurname string `json:"nameAndSurname"`
+	ID          string `json:"id"`
+	Email       string `json:"email"`
+	PhoneNumber string `json:"phoneNumber"`
+	FullName    string `json:"fullName"`
 }
 
 type RegisterRes struct {
-	PhoneRefCode string   `json:"phoneRefCode"`
-	MailRefCode  string   `json:"mailRefCode"`
-	Auth         *AuthRes `json:"auth"`
-	UserInfo     *UserRes `json:"userInfo"`
+	Auth     *AuthRes `json:"auth"`
+	UserInfo *UserRes `json:"userInfo"`
 }

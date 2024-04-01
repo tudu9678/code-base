@@ -4,19 +4,15 @@ package dto
 
 type CreateUserReq struct {
 	Email       string `json:"email" validate:"required,email"`
-	PhoneCode   string `json:"phoneCode" validate:"required"`
+	UserName    string `json:"userName" `
 	PhoneNumber string `json:"phoneNumber" validate:"required,phone_number"`
 	Password    string `json:"password" validate:"required,password"`
-	FirstName   string `json:"firstName"`
-	LastName    string `json:"lastName"`
+	FullName    string `json:"fullName"`
+	Dob         string `json:"dob"`
 	Status      string `json:"status"`
-	CreatedBy   string `json:"-"`
-	UpdatedBy   string `json:"-"`
-	Token       string `json:"captchaVerifyToken"`
-	IP          string `json:"-"`
 }
 
 type LoginReq struct {
-	Username string `json:"username" validate:"required,email"`
+	Username string `json:"username" validate:"required"`
 	Password string `json:"password" validate:"required"`
 }
