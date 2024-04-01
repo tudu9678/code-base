@@ -17,3 +17,6 @@ run_script:
 	./configure-replication.sh
 	./create-schemas.sh
 
+go_start:
+	./env.sh
+	go run ../cmd/main.go

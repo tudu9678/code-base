@@ -1,0 +1,26 @@
+export PORT=8080
+export ENV=local
+export VERSION=v1.0.0
+export LOG_LEVEL=DEBUG
+export APP_NAME=myapp
+export AUTH_SECRET_KEY=myapp-key
+export TOKEN_TTL=604800
+## db matser
+export POSTGRES_USERNAME="postgres"
+export POSTGRES_PASSWORD="postgres"
+export POSTGRES_INSTANCE="localhost"
+export POSTGRES_DB_NAME="postgres"
+export POSTGRES_PORT="5432"
+export POSTGRES_MAX_IDLE_CONNS="5"
+export POSTGRES_MAX_OPEN_CONNS="7"
+export POSTGRES_MAX_LIFETIME="1800"
+
+## db replica1
+export POSTGRES_REPLICA_USERNAME="postgres"
+export POSTGRES_REPLICA_PASSWORD="postgres"
+export POSTGRES_REPLICA_INSTANCE="localhost"
+export POSTGRES_REPLICA_DB_NAME="postgres"
+export POSTGRES_REPLICA_PORT="5433"
+export POSTGRES_REPLICA_MAX_IDLE_CONNS="5"
+export POSTGRES_REPLICA_MAX_OPEN_CONNS="7"
+export POSTGRES_REPLICA_MAX_LIFETIME="1800"
