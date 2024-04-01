@@ -22,4 +22,5 @@ type UserRes struct {
 type RegisterRes struct {
 	Auth     *AuthRes `json:"auth"`
 	UserInfo *UserRes `json:"userInfo"`
+	Error    error    `json:"-"`
 }

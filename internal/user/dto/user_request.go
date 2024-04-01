@@ -9,7 +9,6 @@ type CreateUserReq struct {
 	Password    string `json:"password" validate:"required,password"`
 	FullName    string `json:"fullName"`
 	Dob         string `json:"dob"`
-	Status      string `json:"status"`
 }
 
 type LoginReq struct {

@@ -23,7 +23,7 @@ func NewConnector(ctx context.Context, service, env string) *connector {
 
 // postgres
 func (c *connector) InitPostgres(config *Postgres) *g.DB {
-	uri := fmt.Sprintf("host=localhost user=%s password=%s dbname=%s port=%s sslmode=disable", config.Username, config.Password, config.DB, "5432")
+	uri := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable", config.Instance, config.Username, config.Password, config.DB, config.Port)
 
 	cli, err := g.Open(postgres.New(postgres.Config{
 		DSN:                  uri,

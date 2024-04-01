@@ -25,11 +25,26 @@ type Postgres struct {
 	Password    string   `json:"POSTGRES_PASSWORD"`
 	Instance    string   `json:"POSTGRES_INSTANCE"`
 	DB          string   `json:"POSTGRES_DB_NAME"`
+	Port        string   `json:"POSTGRES_PORT"`
 	Proxy       string   `json:"POSTGRES_PROXY"`
 	Drive       string   `json:"POSTGRES_DRIVE"`
 	MaxIdle     string   `json:"POSTGRES_MAX_IDLE_CONNS"`
 	MaxOpen     string   `json:"POSTGRES_MAX_OPEN_CONNS"`
 	MaxLifetime string   `json:"POSTGRES_MAX_LIFETIME"`
+	GormConfig  g.Config //gorm config for open connection
+}
+
+type PostgresReplica struct {
+	Username    string   `json:"POSTGRES_REPLICA_USERNAME"`
+	Password    string   `json:"POSTGRES_REPLICA_PASSWORD"`
+	Instance    string   `json:"POSTGRES_REPLICA_INSTANCE"`
+	DB          string   `json:"POSTGRES_REPLICA_DB_NAME"`
+	Port        string   `json:"POSTGRES_REPLICA_PORT"`
+	Proxy       string   `json:"POSTGRES_REPLICA_PROXY"`
+	Drive       string   `json:"POSTGRES_REPLICA_DRIVE"`
+	MaxIdle     string   `json:"POSTGRES_REPLICA_MAX_IDLE_CONNS"`
+	MaxOpen     string   `json:"POSTGRES_REPLICA_MAX_OPEN_CONNS"`
+	MaxLifetime string   `json:"POSTGRES_REPLICA_MAX_LIFETIME"`
 	GormConfig  g.Config //gorm config for open connection
 }
 

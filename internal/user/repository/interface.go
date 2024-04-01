@@ -16,4 +16,5 @@ type UserRepo interface {
 	CreateUser(user *model.User) error
 	UpdateUser(tx *gorm.DB, user *model.User) error
 	FindByCondition(ctx context.Context, conds model.User) (*model.User, error)
+	CheckUserExist(ctx context.Context, conds model.User) (*model.User, error)
 }

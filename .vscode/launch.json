@@ -16,7 +16,7 @@
                 // "VERSION": "v1.0.0",
                 // "LOG_LEVEL": "DEBUG",
             },
-            "envFile": "${workspaceFolder}/local.env",
+            "envFile": "${workspaceFolder}/cmd/local.env",
         }
     ]
 }

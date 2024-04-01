@@ -17,15 +17,15 @@ type JWTAuth struct {
 	tokenTTL   uint64
 }
 
-func NewJWTAuth(iss, key string, tokenTTL uint64) *JWTAuth {
-	return &JWTAuth{
+func NewJWTAuth(iss, key string, tokenTTL uint64) JWTAuth {
+	return JWTAuth{
 		iss:        iss,
 		signingKey: key,
 		tokenTTL:   tokenTTL,
 	}
 }
 
-func (jwtAuth *JWTAuth) CreateLoginToken(user IUser, expiredIn string) (*Auth, error) {
+func (jwtAuth JWTAuth) CreateLoginToken(user IUser, expiredIn string) (*Auth, error) {
 	mySigningKey := []byte(jwtAuth.signingKey)
 
 	// generate access_token
@@ -56,7 +56,7 @@ func (jwtAuth *JWTAuth) CreateLoginToken(user IUser, expiredIn string) (*Auth, e
 	}, nil
 }
 
-func (jwtAuth *JWTAuth) CreateToken(user *User, expiredIn string) (*Auth, error) {
+func (jwtAuth JWTAuth) CreateToken(user *User, expiredIn string) (*Auth, error) {
 	mySigningKey := []byte(jwtAuth.signingKey)
 
 	// generate access_token
@@ -103,7 +103,7 @@ func (jwtAuth *JWTAuth) CreateToken(user *User, expiredIn string) (*Auth, error)
 	}, nil
 }
 
-// func (jwtAuth *JWTAuth) RefreshToken(refreshTokenStr string, expiredIn string) (*Auth, error) {
+// func (jwtAuth JWTAuth) RefreshToken(refreshTokenStr string, expiredIn string) (*Auth, error) {
 // 	refreshToken, err := jwt.Parse(refreshTokenStr, func(token *jwt.Token) (interface{}, error) {
 // 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 // 			return nil, &errors.AuthError{Code: errors.ErrorInvalidToken}
@@ -133,7 +133,7 @@ func (jwtAuth *JWTAuth) CreateToken(user *User, expiredIn string) (*Auth, error)
 // }
 
 // ParseToken
-func (jwtAuth *JWTAuth) ParseToken(tokenStr string) (*TokenInfo, error) {
+func (jwtAuth JWTAuth) ParseToken(tokenStr string) (*TokenInfo, error) {
 	claims, err := jwtAuth.ClaimToken(tokenStr)
 	if err != nil {
 		return nil, err
@@ -173,7 +173,7 @@ func (jwtAuth *JWTAuth) ParseToken(tokenStr string) (*TokenInfo, error) {
 }
 
 // ClaimToken
-func (jwtAuth *JWTAuth) ClaimToken(tokenStr string) (jwt.MapClaims, error) {
+func (jwtAuth JWTAuth) ClaimToken(tokenStr string) (jwt.MapClaims, error) {
 	token, err := jwt.Parse(tokenStr, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, &errors.AuthError{Code: errors.ErrorInvalidToken}
@@ -200,7 +200,7 @@ func (jwtAuth *JWTAuth) ClaimToken(tokenStr string) (jwt.MapClaims, error) {
 }
 
 // ParseLoginToken
-func (jwtAuth *JWTAuth) ParseLoginToken(tokenStr string) (*TokenInfo, error) {
+func (jwtAuth JWTAuth) ParseLoginToken(tokenStr string) (*TokenInfo, error) {
 	claims, err := jwtAuth.ClaimToken(tokenStr)
 	if err != nil {
 		return nil, err

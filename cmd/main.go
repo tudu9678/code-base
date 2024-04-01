@@ -3,7 +3,13 @@ package main
 import (
 	"context"
 	"fmt"
+	"log"
 	"net/http"
+
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
+	"gorm.io/gorm"
+	gLog "gorm.io/gorm/logger"
 
 	"myapp/config"
 	in "myapp/core/initialize"
@@ -11,36 +17,38 @@ import (
 	repo "myapp/internal/user/repository"
 	svc "myapp/internal/user/service"
 	handler "myapp/internal/user/transport/http"
-
-	"github.com/labstack/echo/v4"
 )
 
 func main() {
 	e := echo.New()
 	// Register recover middleware
 	e.Use(recoverMiddleware)
-
-	e.GET("/health-check", func(c echo.Context) error {
-		return c.String(http.StatusOK, "i'm ok")
-	})
+	e.Use(middleware.Logger())
 
 	var (
 		internalCfg = &config.Config{}
-		dbCfg       = &in.Postgres{}
+		dbMasterCfg = &in.Postgres{}
 	)
-	if err := in.LoadConfiguration(internalCfg, dbCfg); err != nil {
+	if err := in.LoadConfiguration(internalCfg, dbMasterCfg); err != nil {
 		e.Logger.Error(err)
 	}
+	handler := handler.NewUserHandler(e)
 
 	conn := in.NewConnector(context.Background(), internalCfg.AppName, internalCfg.ENV)
+	dbMasterCfg.GormConfig = gorm.Config{
+		Logger:      gLog.Default.LogMode(gLog.Error),
+		PrepareStmt: false,
+	}
 	logger := in.NewLogRus(internalCfg.LogLevel, fmt.Sprintf("%s-logger", "auth-service"), internalCfg.ENV)
 
 	in.RegisterIOCs("logger", logger)
+	in.RegisterIOCs("server", e)
 	in.RegisterIOCs("jwt-auth", auth.NewJWTAuth(internalCfg.AppName, internalCfg.AuthSecretKey, config.ParseStringToUint64(internalCfg.TokenTTL)))
-	in.RegisterIOCs("db", conn.InitPostgres(dbCfg))
+	in.RegisterIOCs("db-master", conn.InitPostgres(dbMasterCfg))
 	in.RegisterIOCs("user-repo", repo.NewUserRepo())
 	in.RegisterIOCs("user-svc", svc.NewUserService())
-	in.RegisterIOCs("handler", handler.NewUserHandler())
+	in.RegisterIOCs("user-handler", handler)
+
 	//in.RegisterIOCs("middleware", md)
 
 	if err := in.InitIOCs(); err != nil {
@@ -48,7 +56,12 @@ func main() {
 	}
 
 	// Start the server
-	e.Start(internalCfg.Port)
+	if err := handler.MapRouters(); err != nil {
+		log.Fatalf("MapHandlers Error: %v", err)
+	}
+	if err := e.Start(fmt.Sprintf(":%s", internalCfg.Port)); err != nil {
+		log.Fatalf("Running HTTP server: %v", err)
+	}
 
 }
 
